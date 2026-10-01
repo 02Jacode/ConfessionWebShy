@@ -8,6 +8,7 @@ import { GumamelaCard } from "./Cards/gumamela";
 import { Envelope, LetterCard } from "./Cards/letter";
 import { TeddyBearCard } from "./Cards/tiddyBear";
 import { PhotoGallery } from "./Cards/PhotoGallery";
+import { loadReplies, RepliesList, saveReplies, type SentReply } from "./Replies";
 
 // ✏️ Personalize these
 const CRUSH_NAME = "Crush";
@@ -78,6 +79,46 @@ export function Confession() {
   const [noPos, setNoPos] = useState({ x: 0, y: 0 });
   const audioRef = useRef<HTMLAudioElement>(null);
   const buttonAreaRef = useRef<HTMLDivElement>(null);
+  const [reply, setReply] = useState("");
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const [replies, setReplies] = useState<SentReply[]>(loadReplies);
+  const [showReplies, setShowReplies] = useState(false);
+
+  // Quietly emails you the moment she taps "Oo, pwede". Nothing is shown
+  // or saved on her side, and a failure is ignored.
+  const yesSentRef = useRef(false);
+  const notifyYes = () => {
+    if (yesSentRef.current) return;
+    yesSentRef.current = true;
+    fetch("/api/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "yes" }),
+      keepalive: true,
+    }).catch(() => {});
+  };
+
+  const sendAnswer = async () => {
+    const message = reply.trim();
+    if (!message) return;
+    setSendStatus("sending");
+    try {
+      const res = await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "message", message }),
+      });
+      if (res.ok) {
+        const updated = [...replies, { message, sentAt: new Date().toISOString() }];
+        setReplies(updated);
+        saveReplies(updated);
+      }
+      setSendStatus(res.ok ? "sent" : "error");
+    } catch {
+      setSendStatus("error");
+    }
+  };
   const [playing, setPlaying] = useState(false);
   const [openCard, setOpenCard] = useState<CardId | null>(null);
   const [loading, setLoading] = useState(true);
@@ -226,6 +267,15 @@ export function Confession() {
               <br />
               <span className="italic text-hibiscus">Hi, Shy</span>
             </h1>
+            {replies.length > 0 && (
+              <button
+                onClick={() => setShowReplies(true)}
+                className="fade-up rounded-full border border-petal/30 bg-white/80 px-5 py-2 text-sm font-semibold text-hibiscus shadow-sm transition-colors hover:bg-blush"
+                style={{ animationDelay: "0.5s" }}
+              >
+                📬 My replies ({replies.length})
+              </button>
+            )}
           </div>
         )}
 
@@ -274,7 +324,10 @@ export function Confession() {
               className="relative mt-4 flex h-48 w-full flex-col items-center justify-center gap-5 sm:mt-6 sm:h-40 sm:flex-row sm:gap-6"
             >
               <button
-                onClick={() => setStage("yes")}
+                onClick={() => {
+                  notifyYes();
+                  setStage("yes");
+                }}
                 className="relative z-10 rounded-full bg-hibiscus px-8 py-3 font-semibold text-white shadow-lg shadow-hibiscus/30 transition-all hover:bg-deep"
                 style={{ transform: `scale(${yesScale})` }}
               >
@@ -326,9 +379,50 @@ export function Confession() {
               You just made my whole garden bloom. I promise to take care of you like the gumamela in
               our bakuran: every single day, rain or shine.
             </p>
-            <p className="fade-up font-script text-xl text-hibiscus sm:text-2xl" style={{ animationDelay: "1.6s" }}>
-              Screenshot this and send it to me 💌
-            </p>
+            {sendStatus === "sent" ? (
+              <div className="flex flex-col items-center gap-3">
+                <p className="fade-up font-script text-2xl text-hibiscus">Sent! I got your message 💌</p>
+                <button
+                  onClick={() => {
+                    setReply("");
+                    setSendStatus("idle");
+                  }}
+                  className="fade-up rounded-full border-2 border-hibiscus px-6 py-2 font-semibold text-hibiscus transition-colors hover:bg-hibiscus hover:text-white"
+                  style={{ animationDelay: "0.3s" }}
+                >
+                  Send another message ✍️
+                </button>
+              </div>
+            ) : (
+              <div className="fade-up flex w-full flex-col items-center gap-3" style={{ animationDelay: "1.6s" }}>
+                <textarea
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  maxLength={1000}
+                  rows={3}
+                  placeholder="Write me a message…"
+                  className="w-full resize-none rounded-2xl border border-petal/30 bg-white/80 px-4 py-3 text-base text-ink placeholder:text-muted/60 focus:border-hibiscus focus:outline-none"
+                />
+                <button
+                  onClick={sendAnswer}
+                  disabled={sendStatus === "sending" || !reply.trim()}
+                  className="heartbeat rounded-full bg-hibiscus px-8 py-3 font-semibold text-white shadow-lg shadow-hibiscus/30 transition-colors hover:bg-deep disabled:animate-none disabled:opacity-70"
+                >
+                  {sendStatus === "sending" ? "Sending…" : "Send message 💌"}
+                </button>
+                {sendStatus === "error" && (
+                  <p className="text-sm text-muted">
+                    Hindi na-send 🥺 Try again, or screenshot this and send it to me.
+                  </p>
+                )}
+              </div>
+            )}
+            {replies.length > 0 && (
+              <div className="mt-2 flex w-full flex-col items-center gap-3">
+                <h3 className="font-script text-2xl text-hibiscus">Mga na-send mo sa akin 📬</h3>
+                <RepliesList replies={replies} />
+              </div>
+            )}
             <button
               onClick={() => {
                 setNoCount(0);
@@ -338,11 +432,17 @@ export function Confession() {
               className="fade-up text-sm text-muted underline underline-offset-4 hover:text-hibiscus"
               style={{ animationDelay: "2s" }}
             >
-              Read it again
+              Back
             </button>
           </div>
         )}
       </div>
+      )}
+
+      {showReplies && (
+        <CardModal title="My replies" onClose={() => setShowReplies(false)}>
+          <RepliesList replies={replies} />
+        </CardModal>
       )}
 
       {openCard && (
