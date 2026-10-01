@@ -1,10 +1,10 @@
-// Emails you when she says yes. Needs RESEND_API_KEY and NOTIFY_EMAIL
+// Emails you when she says yes. Needs EMAILSHY_API_KEY (a Resend key) and NOTIFY_EMAIL
 // in .env.local (and in Netlify's environment variables when deployed).
 
 import { buildEmail } from "./emailTemplate";
 
 export async function POST(request: Request) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.EMAILSHY_API_KEY;
   const to = process.env.NOTIFY_EMAIL;
   if (!apiKey || !to) {
     return Response.json({ error: "Email is not set up yet" }, { status: 500 });
