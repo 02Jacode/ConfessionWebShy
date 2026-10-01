@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Bear ears -->
+  <circle cx="15" cy="20" r="9" fill="#c98b5a"/>
+  <circle cx="15" cy="20" r="4.5" fill="#eab391"/>
+  <circle cx="45" cy="20" r="9" fill="#c98b5a"/>
+  <!-- Bear head -->
+  <circle cx="30" cy="38" r="22" fill="#c98b5a"/>
+  <ellipse cx="30" cy="46" rx="10" ry="8" fill="#f6dfc0"/>
+  <ellipse cx="30" cy="42" rx="4" ry="3" fill="#4a2a1a"/>
+  <path d="M30 45 v3 M30 48 q-3 3 -6 0 M30 48 q3 3 6 0" stroke="#4a2a1a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <circle cx="21" cy="34" r="2.6" fill="#4a2a1a"/>
+  <circle cx="39" cy="34" r="2.6" fill="#4a2a1a"/>
+  <circle cx="16" cy="44" r="4" fill="#ff8a98" opacity="0.6"/>
+  <circle cx="44" cy="44" r="4" fill="#ff8a98" opacity="0.6"/>
+  <!-- Gumamela by the ear -->
+  <g transform="translate(48 16) scale(0.85)">
+    <g fill="#e8364f" stroke="#a10f2b" stroke-width="0.8">
+      <ellipse cx="0" cy="-8" rx="6" ry="8.5"/>
+      <ellipse cx="0" cy="-8" rx="6" ry="8.5" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-8" rx="6" ry="8.5" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-8" rx="6" ry="8.5" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-8" rx="6" ry="8.5" transform="rotate(288)"/>
+    </g>
+    <circle r="4" fill="#6d0f1f"/>
+    <path d="M0 0 L6 -7" stroke="#fbe3b0" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="6.5" cy="-7.5" r="1.8" fill="#f4c542"/>
+  </g>
+</svg>
