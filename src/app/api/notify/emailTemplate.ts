@@ -21,8 +21,10 @@ const SANS = "'Segoe UI', Helvetica, Arial, sans-serif";
 const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 type Options = {
-  // "yes": sent quietly when she taps "Oo, pwede". "message": a letter she wrote.
-  kind: "yes" | "message";
+  // "yes": she tapped "Oo, pwede". "think": she tapped "Pag-iisipan ko muna".
+  // "no": she tapped "Hindi talaga". "slow": she tapped "Masyadong mabilis".
+  // "message": a letter she wrote.
+  kind: "yes" | "think" | "no" | "slow" | "message";
   message: string;
   sentAt: string;
 };
@@ -38,16 +40,59 @@ const divider = (icon: string) => `
   </table>`;
 
 export function buildEmail({ kind, message, sentAt }: Options) {
-  const isYes = kind === "yes";
-  const subject = isYes ? "She said YES! 🌺" : "A message from her 💌";
-  const eyebrow = isYes ? "Your answer is here" : "A new letter for you";
-  const title = isYes ? "She said yes!" : "She wrote to you";
-  const subtitle = isYes
-    ? "She tapped &ldquo;Oo, pwede&rdquo; on your gumamela page"
-    : "May bagong mensahe galing sa kanya";
-  const preheader = isYes ? "She said yes to you!" : message.slice(0, 90);
+  const COPY = {
+    yes: {
+      subject: "She said YES! 🌺",
+      eyebrow: "Your answer is here",
+      title: "She said yes!",
+      subtitle: "She tapped &ldquo;Oo, pwede&rdquo; on your gumamela page",
+      preheader: "She said yes to you!",
+      note: "Pwede ka na raw manligaw. 🌺<br>Good luck!",
+      plainNote: 'She tapped "Oo, pwede". Pwede ka na raw manligaw. Good luck!',
+    },
+    think: {
+      subject: "She's thinking about it 🤔",
+      eyebrow: "Your answer is here",
+      title: "She needs a little time",
+      subtitle: "She tapped &ldquo;Pag-iisipan ko muna&rdquo; on your gumamela page",
+      preheader: "Hindi pa yes, pero hindi rin no.",
+      note: "Hindi pa yes, pero hindi rin no. 🌱<br>Be patient, gumamelas bloom in their own time.",
+      plainNote:
+        'She tapped "Pag-iisipan ko muna". Hindi pa yes, pero hindi rin no. Be patient, gumamelas bloom in their own time.',
+    },
+    no: {
+      subject: "She answered: Hindi talaga",
+      eyebrow: "Your answer is here",
+      title: "She said no",
+      subtitle: "She tapped &ldquo;Hindi talaga&rdquo; on your gumamela page",
+      preheader: "Not the answer you hoped for, but you were brave.",
+      note: "Hindi ito ang sagot na hinihintay mo. 🌱<br>Pero matapang ka sa pagsabi, and that matters.",
+      plainNote:
+        'She tapped "Hindi talaga". Hindi ito ang sagot na hinihintay mo, pero matapang ka sa pagsabi, and that matters.',
+    },
+    slow: {
+      subject: "She answered: Masyadong mabilis 🌱",
+      eyebrow: "Your answer is here",
+      title: "She wants to take it slow",
+      subtitle: "She tapped &ldquo;Masyadong mabilis&rdquo; on your gumamela page",
+      preheader: "Not a no, just slower.",
+      note: "Hindi no, dahan-dahan lang daw. 🌱<br>Get to know each other more, at her pace.",
+      plainNote:
+        'She tapped "Masyadong mabilis". Hindi no, dahan-dahan lang daw. Get to know each other more, at her pace.',
+    },
+    message: {
+      subject: "A message from her 💌",
+      eyebrow: "A new letter for you",
+      title: "She wrote to you",
+      subtitle: "May bagong mensahe galing sa kanya",
+      preheader: message.slice(0, 90),
+      note: "",
+      plainNote: "",
+    },
+  }[kind];
+  const { subject, eyebrow, title, subtitle, preheader } = COPY;
 
-  const letter = !isYes
+  const letter = kind === "message"
     ? `<p style="margin:0 0 14px;font-family:${SERIF};font-size:20px;font-style:italic;color:${C.hibiscus}">Dear Jacob,</p>
        <p style="margin:0;font-family:${SERIF};font-size:18px;line-height:1.75;color:${C.ink}">
          ${escapeHtml(message).replace(/\n/g, "<br>")}
@@ -56,7 +101,7 @@ export function buildEmail({ kind, message, sentAt }: Options) {
          &mdash; her &#9825;
        </p>`
     : `<p style="margin:0;font-family:${SERIF};font-size:19px;line-height:1.6;font-style:italic;color:${C.muted};text-align:center">
-         Pwede ka na raw manligaw. 🌺<br>Good luck!
+         ${COPY.note}
        </p>`;
 
   const html = `<!doctype html>
@@ -137,7 +182,7 @@ export function buildEmail({ kind, message, sentAt }: Options) {
   const text = [
     title,
     "",
-    isYes ? "She tapped \"Oo, pwede\". Pwede ka na raw manligaw. Good luck!" : `Dear Jacob,\n\n${message}\n\n— Shy ♡`,
+    kind === "message" ? `Dear Jacob,\n\n${message}\n\n— Shy ♡` : COPY.plainNote,
     "",
     `Received: ${sentAt}`,
   ].join("\n");

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const kind = body.kind === "message" ? "message" : "yes";
+  const kind = ["message", "think", "no", "slow"].includes(body.kind) ? body.kind : "yes";
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 1000) : "";
   if (kind === "message" && !message) {
     return Response.json({ error: "Message is empty" }, { status: 400 });

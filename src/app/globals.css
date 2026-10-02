@@ -127,6 +127,112 @@ body {
   }
 }
 
+/* Photo lightbox: background fades in, photo zooms in, a shine sweeps across
+   it once, and a small heart floats up from the frame */
+.photo-backdrop {
+  animation: photoFade 0.25s ease-out;
+}
+
+@keyframes photoFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.photo-shine {
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+  transform: translateX(-100%);
+  animation: photoShine 1s ease-out 0.25s forwards;
+}
+
+@keyframes photoShine {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.photo-heart {
+  opacity: 0;
+  animation: photoHeart 1.6s ease-out 0.3s forwards;
+}
+
+@keyframes photoHeart {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(1);
+  }
+}
+
+.photo-pop {
+  animation: photoPop 0.25s ease-out;
+}
+
+@keyframes photoPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tapping the letter skips the slow reveal: everything waiting shows at once.
+   Lines before "Read more…" and lines after it (.letter-after) skip separately. */
+.skip-before .letter-reveal:not(.letter-after),
+.skip-after .letter-after {
+  animation: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
+/* Thin, petal-colored scrollbar for the letter box */
+.letter-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--petal) transparent;
+}
+
+.letter-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.letter-scroll::-webkit-scrollbar-thumb {
+  background: var(--petal);
+  border-radius: 999px;
+}
+
+/* Letter paragraphs: drift up softly and come into focus */
+.letter-reveal {
+  opacity: 0;
+  animation: letterReveal 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes letterReveal {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
 .bloom-soft {
   animation: bloomSoft 0.35s ease-out;
 }
@@ -172,8 +278,14 @@ body {
     animation: none;
   }
   .fade-up,
-  .bloom {
+  .letter-reveal,
+  .bloom,
+  .photo-pop,
+  .photo-backdrop {
     animation-duration: 0.01s;
     animation-delay: 0s !important;
   }
-}
+  .photo-shine,
+  .photo-heart {
+    display: none;
+  }}

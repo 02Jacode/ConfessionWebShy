@@ -19,8 +19,8 @@ const dancing = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Para Sa'yo 🌺",
-  description: "A little gumamela, and something I've been meaning to tell you.",
+  title: "Hi Shy 🌺",
+  description: "This Website is specifically for you, Shy.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
